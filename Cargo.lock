@@ -1572,7 +1572,7 @@ dependencies = [
 [[package]]
 name = "ed25519-dalek"
 version = "2.0.0-rc.3"
-source = "git+https://github.com/Fiono11/ed25519-dalek#fbd7aa21656ba9116a475b8fda33c10007d2f41f"
+source = "git+https://github.com/Fiono11/ed25519-dalek#a4f961dc6ef5b1b7f1a66f03c85f78bd3c1b19c0"
 dependencies = [
  "curve25519-dalek 4.1.2",
  "ed25519 2.3.0-pre",
@@ -2998,6 +2998,7 @@ dependencies = [
  "open",
  "openssl",
  "prettytable",
+ "rand 0.8.5",
  "reqwest",
  "rust_decimal",
  "self_update",

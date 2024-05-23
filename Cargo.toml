@@ -100,6 +100,8 @@ interactive-clap-derive = "0.2.10"
 
 rust_decimal = "1.35.0"
 
+rand = "0.8.5"
+
 [features]
 default = ["ledger", "self-update"]
 ledger = ["near-ledger"]

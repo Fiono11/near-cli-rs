@@ -3,7 +3,6 @@ use serde_json::from_str;
 use std::{
     fs::{self, File},
     io::Write,
-    path::Path,
 };
 
 use crate::types::path_buf::PathBuf;
@@ -26,6 +25,7 @@ impl SimplpedpopRound1Context {
         scope: &<SimplpedpopRound1 as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
     ) -> color_eyre::eyre::Result<Self> {
         let file_path: std::path::PathBuf = scope.round1.clone().into();
+
         let secret_key_string = fs::read_to_string(file_path.join("secret_key.json")).unwrap();
 
         let secret_key_vec: Vec<u8> = from_str(&secret_key_string).unwrap();
