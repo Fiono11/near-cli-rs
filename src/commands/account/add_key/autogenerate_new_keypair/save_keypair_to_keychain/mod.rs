@@ -48,7 +48,7 @@ impl From<SaveKeypairToKeychainContext> for crate::commands::ActionContext {
                         network_config.clone(),
                         &serde_json::to_string(&item.0.key_pair_properties)?,
                         &item.0.key_pair_properties.public_key_str,
-                        signed_transaction.transaction.signer_id().as_ref(),
+                        signed_transaction.transaction.signer_id.as_ref(),
                     )?;
                     Ok(())
                 },

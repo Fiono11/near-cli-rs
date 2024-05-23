@@ -67,7 +67,7 @@ impl From<SaveKeypairToLegacyKeychainContext> for crate::commands::ActionContext
                         credentials_home_dir.clone(),
                         &key_pair_properties_buf,
                         &item.key_pair_properties.public_key_str,
-                        signed_transaction.transaction.signer_id().as_ref(),
+                        signed_transaction.transaction.signer_id.as_ref(),
                     )
                     .wrap_err_with(|| {
                         format!(
