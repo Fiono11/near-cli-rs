@@ -67,10 +67,17 @@ impl FrostRound2Context {
         let output_bytes: Vec<u8> = from_str(&output_string).unwrap();
         let spp_output = SPPOutput::from_bytes(&output_bytes).unwrap();
 
+        let threshold_public_key = spp_output.threshold_public_key;
+
+        //let pk = bs58::encode(&threshold_public_key.0).into_string();
+
+        //println!("pk: {:?}", pk);
+
         let tx_hash_string = fs::read_to_string(file_path.join("tx_hash.json")).unwrap();
+
         let tx_hash_str: String = from_str(&tx_hash_string).unwrap();
 
-        let tx_hash_bytes = hex::decode(tx_hash_str.trim()).unwrap();
+        let tx_hash_bytes = hex::decode(tx_hash_str).unwrap();
 
         let signing_package = signing_share
             .sign(
