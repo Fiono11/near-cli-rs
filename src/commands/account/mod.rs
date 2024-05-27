@@ -2,6 +2,7 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod add_key;
 pub mod create_account;
+pub mod create_threshold_account;
 mod delete_account;
 mod delete_key;
 mod export_account;
@@ -27,46 +28,51 @@ pub struct AccountCommands {
 /// What do you want to do with an account?
 pub enum AccountActions {
     #[strum_discriminants(strum(
-        message = "view-account-summary    - View properties for an account"
+        message = "view-account-summary     - View properties for an account"
     ))]
     /// View properties for an account
     ViewAccountSummary(self::view_account_summary::ViewAccountSummary),
     #[strum_discriminants(strum(
-        message = "import-account          - Import existing account (a.k.a. \"sign in\")"
+        message = "import-account           - Import existing account (a.k.a. \"sign in\")"
     ))]
     /// Import existing account (a.k.a. "sign in")
     ImportAccount(self::import_account::ImportAccountCommand),
-    #[strum_discriminants(strum(message = "export-account          - Export existing account"))]
+    #[strum_discriminants(strum(message = "export-account           - Export existing account"))]
     /// Export existing account
     ExportAccount(self::export_account::ExportAccount),
-    #[strum_discriminants(strum(message = "create-account          - Create a new account"))]
+    #[strum_discriminants(strum(message = "create-account           - Create a new account"))]
     /// Create a new account
     CreateAccount(self::create_account::CreateAccount),
     #[strum_discriminants(strum(
-        message = "update-social-profile   - Update NEAR Social profile"
+        message = "create-threshold-account - Create a new threshold account"
+    ))]
+    /// Create a new threshold account
+    CreateThresholdAccount(self::create_threshold_account::CreateThresholdAccount),
+    #[strum_discriminants(strum(
+        message = "update-social-profile    - Update NEAR Social profile"
     ))]
     /// Update NEAR Social profile
     UpdateSocialProfile(self::update_social_profile::UpdateSocialProfile),
-    #[strum_discriminants(strum(message = "delete-account          - Delete an account"))]
+    #[strum_discriminants(strum(message = "delete-account           - Delete an account"))]
     /// Delete an account
     DeleteAccount(self::delete_account::DeleteAccount),
     #[strum_discriminants(strum(
-        message = "list-keys               - View a list of access keys of an account"
+        message = "list-keys                - View a list of access keys of an account"
     ))]
     /// View a list of access keys of an account
     ListKeys(self::list_keys::ViewListKeys),
     #[strum_discriminants(strum(
-        message = "add-key                 - Add an access key to an account"
+        message = "add-key                  - Add an access key to an account"
     ))]
     /// Add an access key to an account
     AddKey(self::add_key::AddKeyCommand),
     #[strum_discriminants(strum(
-        message = "delete-keys             - Delete access keys from an account"
+        message = "delete-keys              - Delete access keys from an account"
     ))]
     /// Delete access keys from an account
     DeleteKeys(self::delete_key::DeleteKeysCommand),
     #[strum_discriminants(strum(
-        message = "manage-storage-deposit  - Storage management: deposit, withdrawal, balance review"
+        message = "manage-storage-deposit   - Storage management: deposit, withdrawal, balance review"
     ))]
     /// Storage management for contract: deposit, withdrawal, balance review
     ManageStorageDeposit(self::storage_management::Contract),

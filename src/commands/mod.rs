@@ -4,7 +4,7 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 pub mod account;
 mod config;
 pub mod contract;
-pub mod olaf;
+//pub mod olaf;
 mod staking;
 mod tokens;
 pub mod transaction;
@@ -40,11 +40,11 @@ pub enum TopLevelCommand {
     #[strum_discriminants(strum(message = "transaction - Operate transactions"))]
     /// Use this to construct transactions or view a transaction status.
     Transaction(self::transaction::TransactionCommands),
-    /// Use this to construct threshold signed transactions.
+    /* Use this to construct threshold signed transactions.
     #[strum_discriminants(strum(
         message = "olaf        - Manage the execution of the Olaf protocol"
     ))]
-    Olaf(self::olaf::OlafCommands),
+    Olaf(self::olaf::OlafCommands),*/
     /// Use this to manage connections in a configuration file (config.toml).
     #[strum_discriminants(strum(
         message = "config      - Manage connections in a configuration file (config.toml)"
@@ -65,6 +65,10 @@ pub type OnBeforeSigningCallback = std::sync::Arc<
 
 pub type OnAfterGettingNetworkCallback = std::sync::Arc<
     dyn Fn(&crate::config::NetworkConfig) -> color_eyre::eyre::Result<PrepopulatedTransaction>,
+>;
+
+pub type OnAfterGettingNetworkCallbackThresholdAccount = std::sync::Arc<
+    dyn Fn(&crate::config::NetworkConfig) -> color_eyre::eyre::Result<PrepopulatedThresholdAccount>,
 >;
 
 #[derive(Debug, Clone)]
@@ -106,4 +110,30 @@ pub struct TransactionContext {
         crate::transaction_signature_options::OnBeforeSendingTransactionCallback,
     pub on_after_sending_transaction_callback:
         crate::transaction_signature_options::OnAfterSendingTransactionCallback,
+}
+
+#[derive(Clone)]
+pub struct ThresholdAccountActionContext {
+    pub global_context: crate::GlobalContext,
+    pub interacting_with_account_ids: Vec<near_primitives::types::AccountId>,
+    pub on_after_getting_network_callback: OnAfterGettingNetworkCallbackThresholdAccount,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+}
+
+#[derive(Clone)]
+pub struct ThresholdAccountContext {
+    pub global_context: crate::GlobalContext,
+    pub network_config: crate::config::NetworkConfig,
+    pub prepopulated_threshold_account: PrepopulatedThresholdAccount,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+    //pub on_before_sending_transaction_callback:
+    //crate::transaction_signature_options::OnBeforeSendingTransactionCallback,
+    //pub on_after_sending_transaction_callback:
+    //crate::transaction_signature_options::OnAfterSendingTransactionCallback,
+}
+
+#[derive(Debug, Clone)]
+pub struct PrepopulatedThresholdAccount {
+    pub signer_id: near_primitives::types::AccountId,
+    pub recievers_id: Vec<near_primitives::types::AccountId>,
 }
