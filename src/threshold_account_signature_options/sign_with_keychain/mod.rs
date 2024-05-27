@@ -1,6 +1,14 @@
+use std::fs::File;
+use std::io::Write;
+use std::path::PathBuf;
+use std::str::FromStr;
+
 use color_eyre::eyre::{ContextCompat, WrapErr};
 use color_eyre::owo_colors::OwoColorize;
+use ed25519_dalek::olaf::simplpedpop::AllMessage;
+use ed25519_dalek::SigningKey;
 use inquire::CustomType;
+use near_crypto::ED25519SecretKey;
 use tracing_indicatif::span_ext::IndicatifSpanExt;
 
 use crate::common::JsonRpcClientExt;
@@ -64,6 +72,13 @@ impl SignKeychainContext {
         previous_context: crate::commands::ThresholdAccountContext,
         scope: &<SignKeychain as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
     ) -> color_eyre::eyre::Result<Self> {
+        let file_path = PathBuf::from_str("src/commands/account/create_threshold_account").unwrap();
+
+        let recipients = previous_context
+            .prepopulated_threshold_account
+            .receivers_id
+            .clone();
+
         let network_config = previous_context.network_config.clone();
 
         let service_name = std::borrow::Cow::Owned(format!(
@@ -152,6 +167,25 @@ impl SignKeychainContext {
 
         let account_json: super::AccountKeyPair =
             serde_json::from_str(&password).wrap_err("Error reading data")?;
+
+        let mut signing_key =
+            SigningKey::from_keypair_bytes(&account_json.private_key.unwrap_as_ed25519().0)
+                .unwrap();
+
+        let all_message: AllMessage = signing_key
+            .simplpedpop_contribute_all(2, recipients)
+            .unwrap();
+
+        let all_message_bytes: Vec<u8> = all_message.to_bytes();
+        let all_message_vec: Vec<Vec<u8>> = vec![all_message_bytes];
+
+        let all_message_json = serde_json::to_string_pretty(&all_message_vec).unwrap();
+
+        let mut all_message_file = File::create(file_path.join("all_messages.json")).unwrap();
+
+        all_message_file
+            .write_all(&all_message_json.as_bytes())
+            .unwrap();
 
         Ok(Self {
             network_config: previous_context.network_config,
