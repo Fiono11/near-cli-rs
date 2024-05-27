@@ -16,7 +16,7 @@ pub struct Round1 {
     pub sender_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(long)]
     /// The folder that contains the files for the round 1 of the SimplPedPoP protocol
-    round1: PathBuf,
+    files: PathBuf,
     #[interactive_clap(named_arg)]
     /// Select network
     network_config: crate::network_for_threshold_account::NetworkForTransactionArgs,
@@ -30,13 +30,11 @@ impl Round1Context {
         previous_context: crate::GlobalContext,
         scope: &<Round1 as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
     ) -> color_eyre::eyre::Result<Self> {
-        let signer_id = scope.sender_account_id.0.clone();
-
         let on_after_getting_network_callback: crate::commands::OnAfterGettingNetworkCallbackThresholdAccount =
             std::sync::Arc::new({
-                let file_path: std::path::PathBuf = scope.round1.clone().into();
+                let signer_id = scope.sender_account_id.0.clone();
 
-                println!("path: {:?}", file_path);
+                let file_path: std::path::PathBuf = scope.files.clone().into();
 
                 let recipients_string = fs::read_to_string(file_path.join("recipients.json")).unwrap();
 

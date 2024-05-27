@@ -1,5 +1,5 @@
 #![allow(clippy::enum_variant_names, clippy::large_enum_variant)]
-use ed25519_dalek::VerifyingKey;
+use ed25519_dalek::{olaf::simplpedpop::AllMessage, VerifyingKey};
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 pub mod account;
@@ -137,4 +137,34 @@ pub struct ThresholdAccountContext {
 pub struct PrepopulatedThresholdAccount {
     pub signer_id: near_primitives::types::AccountId,
     pub receivers_id: Vec<VerifyingKey>,
+}
+
+#[derive(Debug, Clone)]
+pub struct SimplPedPoPRound2 {
+    pub signer_id: near_primitives::types::AccountId,
+    pub messages: Vec<AllMessage>,
+}
+
+#[derive(Clone)]
+pub struct SimplPedPoPRound2Context {
+    pub global_context: crate::GlobalContext,
+    //pub interacting_with_account_ids: Vec<near_primitives::types::AccountId>,
+    pub on_after_getting_network_callback: OnAfterGettingNetworkCallbackSimplPedPoPRound2,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+}
+
+pub type OnAfterGettingNetworkCallbackSimplPedPoPRound2 = std::sync::Arc<
+    dyn Fn(&crate::config::NetworkConfig) -> color_eyre::eyre::Result<SimplPedPoPRound2>,
+>;
+
+#[derive(Clone)]
+pub struct SimplPedPoPRound2Context2 {
+    pub global_context: crate::GlobalContext,
+    pub network_config: crate::config::NetworkConfig,
+    pub prepopulated_threshold_account: SimplPedPoPRound2,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+    //pub on_before_sending_transaction_callback:
+    //crate::transaction_signature_options::OnBeforeSendingTransactionCallback,
+    //pub on_after_sending_transaction_callback:
+    //crate::transaction_signature_options::OnAfterSendingTransactionCallback,
 }
