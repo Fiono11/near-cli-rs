@@ -142,7 +142,8 @@ impl NetworkForTransactionArgs {
     ) -> color_eyre::eyre::Result<Option<String>> {
         crate::common::input_network_name(
             &context.global_context.config,
-            &context.interacting_with_account_ids,
+            //&context.interacting_with_account_ids,
+            &vec![],
         )
     }
 

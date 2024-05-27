@@ -11,55 +11,74 @@ use crate::types::path_buf::PathBuf;
 #[interactive_clap(input_context = crate::GlobalContext)]
 #[interactive_clap(output_context = Round1Context)]
 pub struct Round1 {
+    #[interactive_clap(skip_default_input_arg)]
+    /// What is the sender account ID?
+    pub sender_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(long)]
     /// The folder that contains the files for the round 1 of the SimplPedPoP protocol
     round1: PathBuf,
+    #[interactive_clap(named_arg)]
+    /// Select network
+    network_config: crate::network_for_threshold_account::NetworkForTransactionArgs,
 }
 
-#[derive(Debug, Clone)]
-pub struct Round1Context;
+#[derive(Clone)]
+pub struct Round1Context(crate::commands::ThresholdAccountActionContext);
 
 impl Round1Context {
     pub fn from_previous_context(
         previous_context: crate::GlobalContext,
         scope: &<Round1 as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
     ) -> color_eyre::eyre::Result<Self> {
-        let file_path: std::path::PathBuf = scope.round1.clone().into();
+        let signer_id = scope.sender_account_id.0.clone();
 
-        let secret_key_string = fs::read_to_string(file_path.join("secret_key.json")).unwrap();
+        let on_after_getting_network_callback: crate::commands::OnAfterGettingNetworkCallbackThresholdAccount =
+            std::sync::Arc::new({
+                let file_path: std::path::PathBuf = scope.round1.clone().into();
 
-        let secret_key_vec: Vec<u8> = from_str(&secret_key_string).unwrap();
+                println!("path: {:?}", file_path);
 
-        let mut secret_key_bytes = [0; 32];
-        secret_key_bytes.copy_from_slice(&secret_key_vec[..32]);
+                let recipients_string = fs::read_to_string(file_path.join("recipients.json")).unwrap();
 
-        let mut keypair = SigningKey::from_bytes(&secret_key_bytes);
+                let recipients_bytes: Vec<Vec<u8>> = from_str(&recipients_string).unwrap();
 
-        let recipients_string = fs::read_to_string(file_path.join("recipients.json")).unwrap();
+                let recipients: Vec<VerifyingKey> = recipients_bytes
+                    .iter()
+                    .map(|recipient_bytes| {
+                        let mut recipient = [0; 32];
+                        recipient.copy_from_slice(recipient_bytes);
+                        VerifyingKey::from_bytes(&recipient).unwrap()
+                    })
+                    .collect();
 
-        let recipients_bytes: Vec<Vec<u8>> = from_str(&recipients_string).unwrap();
+                move |_network_config| {
+                    Ok(crate::commands::PrepopulatedThresholdAccount { signer_id: signer_id.clone(), receivers_id: recipients.clone() })
+                }
+            });
 
-        let recipients: Vec<VerifyingKey> = recipients_bytes
-            .iter()
-            .map(|recipient_bytes| {
-                let mut recipient = [0; 32];
-                recipient.copy_from_slice(recipient_bytes);
-                VerifyingKey::from_bytes(&recipient).unwrap()
-            })
-            .collect();
+        Ok(Self(crate::commands::ThresholdAccountActionContext {
+            global_context: previous_context,
+            on_after_getting_network_callback,
+            on_before_signing_callback: std::sync::Arc::new(
+                |_prepolulated_unsinged_transaction, _network_config| Ok(()),
+            ),
+        }))
+    }
+}
 
-        let all_message: AllMessage = keypair.simplpedpop_contribute_all(2, recipients).unwrap();
+impl Round1 {
+    pub fn input_sender_account_id(
+        context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<Option<crate::types::account_id::AccountId>> {
+        crate::common::input_signer_account_id_from_used_account_list(
+            &context.config.credentials_home_dir,
+            "What is the sender account ID?",
+        )
+    }
+}
 
-        let all_message_bytes: Vec<u8> = all_message.to_bytes();
-        let all_message_vec: Vec<Vec<u8>> = vec![all_message_bytes];
-
-        let all_message_json = serde_json::to_string_pretty(&all_message_vec).unwrap();
-
-        let mut all_message_file = File::create(file_path.join("all_messages.json")).unwrap();
-
-        all_message_file
-            .write_all(&all_message_json.as_bytes())
-            .unwrap();
-        Ok(Self)
+impl From<Round1Context> for crate::commands::ThresholdAccountActionContext {
+    fn from(item: Round1Context) -> Self {
+        item.0
     }
 }

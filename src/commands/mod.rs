@@ -1,4 +1,5 @@
 #![allow(clippy::enum_variant_names, clippy::large_enum_variant)]
+use ed25519_dalek::VerifyingKey;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 pub mod account;
@@ -115,7 +116,7 @@ pub struct TransactionContext {
 #[derive(Clone)]
 pub struct ThresholdAccountActionContext {
     pub global_context: crate::GlobalContext,
-    pub interacting_with_account_ids: Vec<near_primitives::types::AccountId>,
+    //pub interacting_with_account_ids: Vec<near_primitives::types::AccountId>,
     pub on_after_getting_network_callback: OnAfterGettingNetworkCallbackThresholdAccount,
     pub on_before_signing_callback: OnBeforeSigningCallback,
 }
@@ -135,5 +136,5 @@ pub struct ThresholdAccountContext {
 #[derive(Debug, Clone)]
 pub struct PrepopulatedThresholdAccount {
     pub signer_id: near_primitives::types::AccountId,
-    pub recievers_id: Vec<near_primitives::types::AccountId>,
+    pub receivers_id: Vec<VerifyingKey>,
 }
