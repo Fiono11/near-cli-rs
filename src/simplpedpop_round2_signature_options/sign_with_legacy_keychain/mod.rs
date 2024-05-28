@@ -172,29 +172,35 @@ impl SignLegacyKeychainContext {
 
         let file_path = PathBuf::from_str("src/commands/account/create_threshold_account").unwrap();
 
-        /*let recipients = previous_context
-            .prepopulated_threshold_account
-            .receivers_id
-            .clone();
-
         let mut signing_key =
             SigningKey::from_keypair_bytes(&account_json.private_key.unwrap_as_ed25519().0)
                 .unwrap();
 
-        let all_message: AllMessage = signing_key
-            .simplpedpop_contribute_all(2, recipients)
+        let all_messages = previous_context
+            .prepopulated_threshold_account
+            .messages
+            .clone();
+
+        let simplpedpop = signing_key
+            .simplpedpop_recipient_all(&all_messages)
             .unwrap();
+        let output_round1 = simplpedpop.0;
+        let output_json =
+            serde_json::to_string_pretty(&output_round1.spp_output.to_bytes()).unwrap();
 
-        let all_message_bytes: Vec<u8> = all_message.to_bytes();
-        let all_message_vec: Vec<Vec<u8>> = vec![all_message_bytes];
+        let mut output_file = File::create(file_path.0.join("spp_output.json")).unwrap();
 
-        let all_message_json = serde_json::to_string_pretty(&all_message_vec).unwrap();
+        output_file.write_all(&output_json.as_bytes()).unwrap();
 
-        let mut all_message_file = File::create(file_path.0.join("all_messages.json")).unwrap();
+        let signing_share = simplpedpop.1;
+        let signing_share_json =
+            serde_json::to_string_pretty(&signing_share.to_bytes().to_vec()).unwrap();
 
-        all_message_file
-            .write_all(&all_message_json.as_bytes())
-            .unwrap();*/
+        let mut signing_share_file = File::create(file_path.0.join("signing_share.json")).unwrap();
+
+        signing_share_file
+            .write_all(&signing_share_json.as_bytes())
+            .unwrap();
 
         Ok(Self {
             network_config: previous_context.network_config,

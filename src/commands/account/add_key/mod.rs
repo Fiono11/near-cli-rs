@@ -1,11 +1,11 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
-mod access_key_type;
+pub(crate) mod access_key_type;
 mod autogenerate_new_keypair;
 #[cfg(feature = "ledger")]
 mod use_ledger;
 mod use_manually_provided_seed_phrase;
-mod use_public_key;
+pub(crate) mod use_public_key;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(input_context = crate::GlobalContext)]

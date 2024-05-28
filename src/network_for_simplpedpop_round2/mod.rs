@@ -124,6 +124,7 @@ impl interactive_clap::FromCli for NetworkForTransactionArgs {
             ) {
                 interactive_clap::ResultFromCli::Ok(cli_sign_with) | interactive_clap::ResultFromCli::Cancel(Some(cli_sign_with)) => {
                     clap_variant.threshold_account_signature_options = Some(cli_sign_with);
+                    println!("1");
                     interactive_clap::ResultFromCli::Ok(clap_variant)
                 }
                 interactive_clap::ResultFromCli::Cancel(_) => interactive_clap::ResultFromCli::Cancel(Some(clap_variant)),

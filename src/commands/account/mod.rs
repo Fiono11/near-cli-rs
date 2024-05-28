@@ -1,6 +1,6 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
-mod add_key;
+pub(crate) mod add_key;
 pub mod create_account;
 pub mod create_threshold_account;
 mod delete_account;

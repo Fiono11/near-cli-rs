@@ -463,7 +463,7 @@ pub fn get_key_pair_properties_from_seed_phrase(
     );
     let secret_keypair_str = format!(
         "ed25519:{}",
-        bs58::encode(secret_keypair.to_bytes()).into_string()
+        bs58::encode(secret_keypair.to_keypair_bytes()).into_string()
     );
     let key_pair_properties: KeyPairProperties = KeyPairProperties {
         seed_phrase_hd_path,
@@ -534,7 +534,7 @@ pub fn generate_keypair() -> color_eyre::eyre::Result<KeyPairProperties> {
     );
     let secret_keypair_str = format!(
         "ed25519:{}",
-        bs58::encode(secret_keypair.to_bytes()).into_string()
+        bs58::encode(secret_keypair.to_keypair_bytes()).into_string()
     );
     let key_pair_properties: KeyPairProperties = KeyPairProperties {
         seed_phrase_hd_path: generate_keypair.seed_phrase_hd_path,
