@@ -9,13 +9,13 @@ use ed25519_dalek::olaf::simplpedpop::AllMessage;
 use ed25519_dalek::SigningKey;
 use inquire::CustomType;
 use near_crypto::{ED25519SecretKey, PublicKey};
+use near_primitives::types::AccountId;
 use serde_json::from_str;
 use tracing_indicatif::span_ext::IndicatifSpanExt;
 
 use crate::commands::account::create_account::sponsor_by_faucet_service::before_creating_account;
 use crate::common::JsonRpcClientExt;
 use crate::common::RpcQueryResponseExt;
-use crate::types::account_id::AccountId;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(input_context = crate::commands::SimplPedPoPRound2Context2)]
@@ -189,18 +189,22 @@ impl SignKeychainContext {
 
         let pk = bs58::encode(&output_round1.spp_output.threshold_public_key.0).into_string();
 
-        before_creating_account(
+        let home_dir = dirs::home_dir().expect("Impossible to get your home dir!");
+        let mut folder_path = std::path::PathBuf::from(&home_dir);
+        folder_path.push(".near-credentials");
+
+        /*before_creating_account(
             &previous_context.network_config,
-            &AccountId::from_str("threshold_public_key2.testnet").unwrap(),
+            &AccountId::from_str("threshold_public_key4.testnet").unwrap(),
             &PublicKey::from_str(&pk).unwrap(),
-            &PathBuf::from_str("src/commands/account/create_threshold_account").unwrap(),
+            &folder_path,
         )
-        .unwrap();
+        .unwrap();*/
 
         let signing_share = simplpedpop.1;
 
-        let folder_path =
-            PathBuf::from_str("src/commands/account/create_threshold_account").unwrap();
+        //let folder_path =
+        //PathBuf::from_str("src/commands/account/create_threshold_account").unwrap();
 
         let implicit_account_id = near_primitives::types::AccountId::try_from(hex::encode(
             signing_share.0.verifying_key(),
@@ -222,18 +226,32 @@ impl SignKeychainContext {
             "private_key": secret_keypair_str,
         })
         .to_string();
-        let mut file_path = std::path::PathBuf::new();
+
+        crate::common::update_used_account_list_as_signer(
+            &folder_path,
+            &AccountId::from_str("signature_share.testnet").unwrap(),
+        );
+
+        crate::common::save_access_key_to_keychain(
+            network_config.clone(),
+            &buf,
+            &public_key_str,
+            &"signature_share.testnet",
+        )?;
+
+        /*let mut file_path = std::path::PathBuf::new();
         let mut file_name = std::path::PathBuf::new();
         file_name.push(format!("{}.json", implicit_account_id));
         file_path.push(folder_path.clone());
+        file_path.push("accounts.json");
 
-        std::fs::create_dir_all(&file_path)?;
-        file_path.push(file_name);
+        //std::fs::create_dir_all(&file_path)?;
+        //file_path.push(file_name);
         std::fs::File::create(&file_path)
             .wrap_err_with(|| format!("Failed to create file: {:?}", file_path))?
             .write(buf.as_bytes())
             .wrap_err_with(|| format!("Failed to write to file: {:?}", folder_path))?;
-        eprintln!("\nThe file {:?} was saved successfully", &file_path);
+            eprintln!("\nThe file {:?} was saved successfully", &file_path);*/
 
         Ok(Self {
             network_config: previous_context.network_config,

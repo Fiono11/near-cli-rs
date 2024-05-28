@@ -38,13 +38,16 @@ impl Round1Context {
 
                 let recipients_string = fs::read_to_string(file_path.join("recipients.json")).unwrap();
 
-                let recipients_bytes: Vec<Vec<u8>> = from_str(&recipients_string).unwrap();
+                let encoded_strings: Vec<String> = serde_json::from_str(&recipients_string).unwrap();
 
-                let recipients: Vec<VerifyingKey> = recipients_bytes
+                //let recipients_bytes: Vec<Vec<u8>> = from_str(&recipients_string).unwrap();
+
+                let recipients: Vec<VerifyingKey> = encoded_strings
                     .iter()
-                    .map(|recipient_bytes| {
+                    .map(|encoded_string| {
+                        let s = bs58::decode(encoded_string).into_vec().unwrap();
                         let mut recipient = [0; 32];
-                        recipient.copy_from_slice(recipient_bytes);
+                        recipient.copy_from_slice(&s);
                         VerifyingKey::from_bytes(&recipient).unwrap()
                     })
                     .collect();
