@@ -6,7 +6,7 @@ mod print_transaction;
 mod reconstruct_transaction;
 mod send_meta_transaction;
 mod send_signed_transaction;
-pub mod sign_threshold;
+pub mod sign_threshold_transaction;
 pub mod sign_transaction;
 mod view_status;
 
@@ -43,6 +43,11 @@ pub enum TransactionActions {
     ))]
     /// Sign previously prepared unsigned transaction
     SignTransaction(self::sign_transaction::SignTransaction),
+    #[strum_discriminants(strum(
+        message = "sign-threshold-transaction         - Sign previously prepared unsigned threshold transaction"
+    ))]
+    /// Sign previously prepared unsigned threshold transaction
+    SignThresholdTransaction(self::sign_threshold_transaction::ImplicitThresholdAccount),
     #[strum_discriminants(strum(
         message = "print-transaction        - Print all fields of previously prepared transaction without modification"
     ))]

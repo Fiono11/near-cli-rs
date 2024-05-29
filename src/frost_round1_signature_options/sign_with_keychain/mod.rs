@@ -6,9 +6,12 @@ use std::str::FromStr;
 use color_eyre::eyre::{ContextCompat, WrapErr};
 use color_eyre::owo_colors::OwoColorize;
 use ed25519_dalek::olaf::simplpedpop::AllMessage;
-use ed25519_dalek::SigningKey;
+use ed25519_dalek::olaf::SigningKeypair;
+use ed25519_dalek::{SecretKey, SigningKey};
 use inquire::CustomType;
 use near_crypto::ED25519SecretKey;
+use rand::rngs::OsRng;
+use serde_json::Value;
 use tracing_indicatif::span_ext::IndicatifSpanExt;
 
 use crate::common::JsonRpcClientExt;
@@ -85,7 +88,8 @@ impl SignKeychainContext {
                 .as_str()
         ));
 
-        let password = if previous_context.global_context.offline {
+        let password = {
+            //= if previous_context.global_context.offline {
             let res = keyring::Entry::new(
                 &service_name,
                 &format!(
@@ -110,7 +114,7 @@ impl SignKeychainContext {
                     return from_legacy_keychain(previous_context, scope);
                 }
             }
-        } else {
+            /* } else {
             let access_key_list = network_config
                 .json_rpc_client()
                 .blocking_call_view_access_key_list(
@@ -157,15 +161,48 @@ impl SignKeychainContext {
                     ));
                     return from_legacy_keychain(previous_context, scope);
                 }
-            }
+            }*/
         };
 
-        let account_json: super::AccountKeyPair =
-            serde_json::from_str(&password).wrap_err("Error reading data")?;
+        println!("p: {:?}", password);
 
-        let mut signing_key =
-            SigningKey::from_keypair_bytes(&account_json.private_key.unwrap_as_ed25519().0)
-                .unwrap();
+        let parsed_json: Value = serde_json::from_str(&password)?;
+
+        // Extract the private key
+        let private_key = parsed_json
+            .get("private_key")
+            .and_then(Value::as_str)
+            .unwrap();
+
+        let private_key = near_crypto::SecretKey::from_str(&private_key).unwrap();
+
+        let mut signing_share_bytes = [0; 64];
+        signing_share_bytes.copy_from_slice(&private_key.unwrap_as_ed25519().0);
+
+        let signing_share = SigningKeypair::from_bytes(&signing_share_bytes).unwrap();
+
+        let (signing_nonces, signing_commitments) = signing_share.commit(&mut OsRng);
+
+        let signing_nonces_json =
+            serde_json::to_string_pretty(&signing_nonces.to_bytes().to_vec()).unwrap();
+
+        let mut signing_nonces_file = File::create(file_path.join("signing_nonces.json")).unwrap();
+
+        signing_nonces_file
+            .write_all(&signing_nonces_json.as_bytes())
+            .unwrap();
+
+        let signing_commitments_vec = vec![signing_commitments.to_bytes().to_vec()];
+
+        let signing_commitments_json =
+            serde_json::to_string_pretty(&signing_commitments_vec).unwrap();
+
+        let mut signing_commitments_file =
+            File::create(file_path.join("signing_commitments.json")).unwrap();
+
+        signing_commitments_file
+            .write_all(&signing_commitments_json.as_bytes())
+            .unwrap();
 
         Ok(Self {
             network_config: previous_context.network_config,
@@ -220,13 +257,12 @@ impl SignKeychain {
     fn input_signer_public_key(
         context: &crate::commands::FrostRound1Context,
     ) -> color_eyre::eyre::Result<Option<crate::types::public_key::PublicKey>> {
-        if context.global_context.offline {
-            return Ok(Some(
-                CustomType::<crate::types::public_key::PublicKey>::new("Enter public_key:")
-                    .prompt()?,
-            ));
-        }
-        Ok(None)
+        //if context.global_context.offline {
+        return Ok(Some(
+            CustomType::<crate::types::public_key::PublicKey>::new("Enter public_key:").prompt()?,
+        ));
+        //}
+        //Ok(None)
     }
 
     fn input_nonce(
