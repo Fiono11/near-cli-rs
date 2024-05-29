@@ -6,6 +6,7 @@ mod print_transaction;
 mod reconstruct_transaction;
 mod send_meta_transaction;
 mod send_signed_transaction;
+pub mod sign_threshold;
 pub mod sign_transaction;
 mod view_status;
 

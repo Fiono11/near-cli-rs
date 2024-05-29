@@ -72,6 +72,9 @@ pub type OnAfterGettingNetworkCallbackThresholdAccount = std::sync::Arc<
     dyn Fn(&crate::config::NetworkConfig) -> color_eyre::eyre::Result<PrepopulatedThresholdAccount>,
 >;
 
+pub type OnAfterGettingNetworkCallbackFrostRound1 =
+    std::sync::Arc<dyn Fn(&crate::config::NetworkConfig) -> color_eyre::eyre::Result<FrostRound1>>;
+
 #[derive(Debug, Clone)]
 pub struct PrepopulatedTransaction {
     pub signer_id: near_primitives::types::AccountId,
@@ -122,6 +125,14 @@ pub struct ThresholdAccountActionContext {
 }
 
 #[derive(Clone)]
+pub struct FrostRound1ActionContext {
+    pub global_context: crate::GlobalContext,
+    //pub interacting_with_account_ids: Vec<near_primitives::types::AccountId>,
+    pub on_after_getting_network_callback: OnAfterGettingNetworkCallbackFrostRound1,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+}
+
+#[derive(Clone)]
 pub struct ThresholdAccountContext {
     pub global_context: crate::GlobalContext,
     pub network_config: crate::config::NetworkConfig,
@@ -133,10 +144,27 @@ pub struct ThresholdAccountContext {
     //crate::transaction_signature_options::OnAfterSendingTransactionCallback,
 }
 
+#[derive(Clone)]
+pub struct FrostRound1Context {
+    pub global_context: crate::GlobalContext,
+    pub network_config: crate::config::NetworkConfig,
+    pub prepopulated_threshold_account: FrostRound1,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+    //pub on_before_sending_transaction_callback:
+    //crate::transaction_signature_options::OnBeforeSendingTransactionCallback,
+    //pub on_after_sending_transaction_callback:
+    //crate::transaction_signature_options::OnAfterSendingTransactionCallback,
+}
+
 #[derive(Debug, Clone)]
 pub struct PrepopulatedThresholdAccount {
     pub signer_id: near_primitives::types::AccountId,
     pub receivers_id: Vec<VerifyingKey>,
+}
+
+#[derive(Debug, Clone)]
+pub struct FrostRound1 {
+    pub signer_id: near_primitives::types::AccountId,
 }
 
 #[derive(Debug, Clone)]
