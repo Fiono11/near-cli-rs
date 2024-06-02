@@ -225,3 +225,32 @@ pub struct FrostRound2ActionContext {
 pub struct FrostRound2 {
     pub signer_id: near_primitives::types::AccountId,
 }
+
+pub type OnAfterGettingNetworkCallbackFrostAggregate = std::sync::Arc<
+    dyn Fn(&crate::config::NetworkConfig) -> color_eyre::eyre::Result<FrostAggregate>,
+>;
+
+#[derive(Clone)]
+pub struct FrostAggregateContext {
+    pub global_context: crate::GlobalContext,
+    pub network_config: crate::config::NetworkConfig,
+    pub prepopulated_threshold_account: FrostAggregate,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+    //pub on_before_sending_transaction_callback:
+    //crate::transaction_signature_options::OnBeforeSendingTransactionCallback,
+    //pub on_after_sending_transaction_callback:
+    //crate::transaction_signature_options::OnAfterSendingTransactionCallback,
+}
+
+#[derive(Clone)]
+pub struct FrostAggregateActionContext {
+    pub global_context: crate::GlobalContext,
+    //pub interacting_with_account_ids: Vec<near_primitives::types::AccountId>,
+    pub on_after_getting_network_callback: OnAfterGettingNetworkCallbackFrostAggregate,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+}
+
+#[derive(Debug, Clone)]
+pub struct FrostAggregate {
+    pub signer_id: near_primitives::types::AccountId,
+}

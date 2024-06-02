@@ -19,7 +19,7 @@ use crate::common::JsonRpcClientExt;
 use crate::common::RpcQueryResponseExt;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
-#[interactive_clap(input_context = crate::commands::FrostRound2Context)]
+#[interactive_clap(input_context = crate::commands::FrostAggregateContext)]
 #[interactive_clap(output_context = SignKeychainContext)]
 pub struct SignKeychain {
     #[interactive_clap(long)]
@@ -73,7 +73,7 @@ impl SignKeychainContext {
         skip_all
     )]
     pub fn from_previous_context(
-        previous_context: crate::commands::FrostRound2Context,
+        previous_context: crate::commands::FrostAggregateContext,
         scope: &<SignKeychain as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
     ) -> color_eyre::eyre::Result<Self> {
         let file_path = PathBuf::from_str("src/commands/account/create_threshold_account").unwrap();
@@ -261,7 +261,7 @@ fn warning_message(instrument_message: String) {
 
 #[tracing::instrument(name = "Trying to sign with the legacy keychain ...", skip_all)]
 fn from_legacy_keychain(
-    previous_context: crate::commands::FrostRound2Context,
+    previous_context: crate::commands::FrostAggregateContext,
     scope:  &<SignKeychain as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
 ) -> color_eyre::eyre::Result<SignKeychainContext> {
     let legacy_scope =
@@ -297,7 +297,7 @@ fn from_legacy_keychain(
 
 impl SignKeychain {
     fn input_signer_public_key(
-        context: &crate::commands::FrostRound2Context,
+        context: &crate::commands::FrostAggregateContext,
     ) -> color_eyre::eyre::Result<Option<crate::types::public_key::PublicKey>> {
         //if context.global_context.offline {
         return Ok(Some(
@@ -308,7 +308,7 @@ impl SignKeychain {
     }
 
     fn input_nonce(
-        context: &crate::commands::FrostRound2Context,
+        context: &crate::commands::FrostAggregateContext,
     ) -> color_eyre::eyre::Result<Option<u64>> {
         if context.global_context.offline {
             return Ok(Some(
@@ -319,7 +319,7 @@ impl SignKeychain {
     }
 
     fn input_block_hash(
-        context: &crate::commands::FrostRound2Context,
+        context: &crate::commands::FrostAggregateContext,
     ) -> color_eyre::eyre::Result<Option<crate::types::crypto_hash::CryptoHash>> {
         if context.global_context.offline {
             return Ok(Some(
@@ -333,7 +333,7 @@ impl SignKeychain {
     }
 
     fn input_block_height(
-        context: &crate::commands::FrostRound2Context,
+        context: &crate::commands::FrostAggregateContext,
     ) -> color_eyre::eyre::Result<Option<near_primitives::types::BlockHeight>> {
         if context.global_context.offline {
             return Ok(Some(
