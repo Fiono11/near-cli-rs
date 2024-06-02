@@ -5,9 +5,9 @@ use std::io::Write;
 use std::str::FromStr;
 
 use color_eyre::eyre::{ContextCompat, WrapErr};
-use ed25519_dalek::olaf::simplpedpop::AllMessage;
 use ed25519_dalek::SigningKey;
 use inquire::{CustomType, Select};
+use olaf::simplpedpop::AllMessage;
 
 use crate::common::JsonRpcClientExt;
 use crate::common::RpcQueryResponseExt;

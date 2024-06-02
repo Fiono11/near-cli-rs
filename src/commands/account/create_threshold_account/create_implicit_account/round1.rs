@@ -1,4 +1,5 @@
-use ed25519_dalek::{olaf::simplpedpop::AllMessage, SigningKey, VerifyingKey};
+use ed25519_dalek::VerifyingKey;
+use olaf::simplpedpop::AllMessage;
 use serde_json::from_str;
 use std::{
     fs::{self, File},

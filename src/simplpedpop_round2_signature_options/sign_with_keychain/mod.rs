@@ -5,11 +5,12 @@ use std::str::FromStr;
 
 use color_eyre::eyre::{ContextCompat, WrapErr};
 use color_eyre::owo_colors::OwoColorize;
-use ed25519_dalek::olaf::simplpedpop::AllMessage;
 use ed25519_dalek::SigningKey;
 use inquire::CustomType;
 use near_crypto::{ED25519SecretKey, PublicKey};
 use near_primitives::types::AccountId;
+use olaf::simplpedpop::AllMessage;
+use olaf::SigningKeypair;
 use serde_json::from_str;
 use tracing_indicatif::span_ext::IndicatifSpanExt;
 
@@ -167,8 +168,7 @@ impl SignKeychainContext {
             serde_json::from_str(&password).wrap_err("Error reading data")?;
 
         let mut signing_key =
-            SigningKey::from_keypair_bytes(&account_json.private_key.unwrap_as_ed25519().0)
-                .unwrap();
+            SigningKeypair::from_bytes(&account_json.private_key.unwrap_as_ed25519().0).unwrap();
 
         let all_messages = previous_context
             .prepopulated_threshold_account
@@ -206,18 +206,17 @@ impl SignKeychainContext {
         //let folder_path =
         //PathBuf::from_str("src/commands/account/create_threshold_account").unwrap();
 
-        let implicit_account_id = near_primitives::types::AccountId::try_from(hex::encode(
-            signing_share.0.verifying_key(),
-        ))?;
+        let implicit_account_id =
+            near_primitives::types::AccountId::try_from(hex::encode(signing_share.verifying_key))?;
 
         let public_key_str = format!(
             "ed25519:{}",
-            bs58::encode(&signing_share.0.verifying_key()).into_string()
+            bs58::encode(signing_share.verifying_key).into_string()
         );
 
         let secret_keypair_str = format!(
             "ed25519:{}",
-            bs58::encode(signing_share.0.to_keypair_bytes()).into_string()
+            bs58::encode(signing_share.secret_key).into_string()
         );
 
         let buf = serde_json::json!({

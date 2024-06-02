@@ -5,7 +5,7 @@ use crate::{
 
 use super::SaveImplicitAccountContext;
 use color_eyre::eyre::Context;
-use ed25519_dalek::olaf::simplpedpop::AllMessage;
+use olaf::simplpedpop::AllMessage;
 use serde_json::from_str;
 use std::{fs, io::Write};
 

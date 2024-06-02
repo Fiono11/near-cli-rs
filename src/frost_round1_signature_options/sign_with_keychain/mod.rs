@@ -3,14 +3,14 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use bip39::rand_core::OsRng;
 use color_eyre::eyre::{ContextCompat, WrapErr};
 use color_eyre::owo_colors::OwoColorize;
-use ed25519_dalek::olaf::simplpedpop::AllMessage;
-use ed25519_dalek::olaf::SigningKeypair;
 use ed25519_dalek::{SecretKey, SigningKey};
 use inquire::CustomType;
 use near_crypto::ED25519SecretKey;
-use rand::rngs::OsRng;
+use olaf::simplpedpop::AllMessage;
+use olaf::SigningKeypair;
 use serde_json::Value;
 use tracing_indicatif::span_ext::IndicatifSpanExt;
 

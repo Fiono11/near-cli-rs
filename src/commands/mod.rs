@@ -1,5 +1,6 @@
 #![allow(clippy::enum_variant_names, clippy::large_enum_variant)]
-use ed25519_dalek::{olaf::simplpedpop::AllMessage, VerifyingKey};
+use ed25519_dalek::VerifyingKey;
+use olaf::simplpedpop::AllMessage;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 pub mod account;

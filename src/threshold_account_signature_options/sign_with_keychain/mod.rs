@@ -5,10 +5,11 @@ use std::str::FromStr;
 
 use color_eyre::eyre::{ContextCompat, WrapErr};
 use color_eyre::owo_colors::OwoColorize;
-use ed25519_dalek::olaf::simplpedpop::AllMessage;
 use ed25519_dalek::SigningKey;
 use inquire::CustomType;
 use near_crypto::ED25519SecretKey;
+use olaf::simplpedpop::AllMessage;
+use olaf::SigningKeypair;
 use tracing_indicatif::span_ext::IndicatifSpanExt;
 
 use crate::common::JsonRpcClientExt;
@@ -169,8 +170,7 @@ impl SignKeychainContext {
             serde_json::from_str(&password).wrap_err("Error reading data")?;
 
         let mut signing_key =
-            SigningKey::from_keypair_bytes(&account_json.private_key.unwrap_as_ed25519().0)
-                .unwrap();
+            SigningKeypair::from_bytes(&account_json.private_key.unwrap_as_ed25519().0).unwrap();
 
         let all_message: AllMessage = signing_key
             .simplpedpop_contribute_all(2, recipients)
