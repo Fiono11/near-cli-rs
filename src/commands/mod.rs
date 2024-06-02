@@ -197,3 +197,31 @@ pub struct SimplPedPoPRound2Context2 {
     //pub on_after_sending_transaction_callback:
     //crate::transaction_signature_options::OnAfterSendingTransactionCallback,
 }
+
+pub type OnAfterGettingNetworkCallbackFrostRound2 =
+    std::sync::Arc<dyn Fn(&crate::config::NetworkConfig) -> color_eyre::eyre::Result<FrostRound2>>;
+
+#[derive(Clone)]
+pub struct FrostRound2Context {
+    pub global_context: crate::GlobalContext,
+    pub network_config: crate::config::NetworkConfig,
+    pub prepopulated_threshold_account: FrostRound2,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+    //pub on_before_sending_transaction_callback:
+    //crate::transaction_signature_options::OnBeforeSendingTransactionCallback,
+    //pub on_after_sending_transaction_callback:
+    //crate::transaction_signature_options::OnAfterSendingTransactionCallback,
+}
+
+#[derive(Clone)]
+pub struct FrostRound2ActionContext {
+    pub global_context: crate::GlobalContext,
+    //pub interacting_with_account_ids: Vec<near_primitives::types::AccountId>,
+    pub on_after_getting_network_callback: OnAfterGettingNetworkCallbackFrostRound2,
+    pub on_before_signing_callback: OnBeforeSigningCallback,
+}
+
+#[derive(Debug, Clone)]
+pub struct FrostRound2 {
+    pub signer_id: near_primitives::types::AccountId,
+}
