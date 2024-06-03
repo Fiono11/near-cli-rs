@@ -226,7 +226,7 @@ impl SignKeychainContext {
         })
         .to_string();
 
-        crate::common::update_used_account_list_as_signer(
+        /*crate::common::update_used_account_list_as_signer(
             &folder_path,
             &AccountId::from_str("signature_share.testnet").unwrap(),
         );
@@ -236,7 +236,7 @@ impl SignKeychainContext {
             &buf,
             &public_key_str,
             &"signature_share.testnet",
-        )?;
+            )?;*/
 
         /*let mut file_path = std::path::PathBuf::new();
         let mut file_name = std::path::PathBuf::new();

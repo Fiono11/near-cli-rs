@@ -10,8 +10,8 @@ use crate::types::path_buf::PathBuf;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(input_context = crate::GlobalContext)]
-#[interactive_clap(output_context = Round2Context)]
-pub struct Round2 {
+#[interactive_clap(output_context = Round1Context)]
+pub struct Round1 {
     #[interactive_clap(skip_default_input_arg)]
     /// What is the sender account ID?
     pub sender_account_id: crate::types::account_id::AccountId,
@@ -20,18 +20,18 @@ pub struct Round2 {
     files: PathBuf,
     #[interactive_clap(named_arg)]
     /// Select network
-    network_config: crate::network_for_frost_round2::NetworkForTransactionArgs,
+    network_config: crate::network_for_threshold_account::NetworkForTransactionArgs,
 }
 
 #[derive(Clone)]
-pub struct Round2Context(crate::commands::FrostRound2ActionContext);
+pub struct Round1Context(crate::commands::ThresholdAccountActionContext);
 
-impl Round2Context {
+impl Round1Context {
     pub fn from_previous_context(
         previous_context: crate::GlobalContext,
-        scope: &<Round2 as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
+        scope: &<Round1 as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
     ) -> color_eyre::eyre::Result<Self> {
-        let on_after_getting_network_callback: crate::commands::OnAfterGettingNetworkCallbackFrostRound2 =
+        let on_after_getting_network_callback: crate::commands::OnAfterGettingNetworkCallbackThresholdAccount =
             std::sync::Arc::new({
                 let signer_id = scope.sender_account_id.0.clone();
 
@@ -54,11 +54,11 @@ impl Round2Context {
                     .collect();
 
                 move |_network_config| {
-                    Ok(crate::commands::FrostRound2 { signer_id: signer_id.clone() })
+                    Ok(crate::commands::PrepopulatedThresholdAccount { signer_id: signer_id.clone(), receivers_id: recipients.clone() })
                 }
             });
 
-        Ok(Self(crate::commands::FrostRound2ActionContext {
+        Ok(Self(crate::commands::ThresholdAccountActionContext {
             global_context: previous_context,
             on_after_getting_network_callback,
             on_before_signing_callback: std::sync::Arc::new(
@@ -68,7 +68,7 @@ impl Round2Context {
     }
 }
 
-impl Round2 {
+impl Round1 {
     pub fn input_sender_account_id(
         context: &crate::GlobalContext,
     ) -> color_eyre::eyre::Result<Option<crate::types::account_id::AccountId>> {
@@ -79,8 +79,8 @@ impl Round2 {
     }
 }
 
-impl From<Round2Context> for crate::commands::FrostRound2ActionContext {
-    fn from(item: Round2Context) -> Self {
+impl From<Round1Context> for crate::commands::ThresholdAccountActionContext {
+    fn from(item: Round1Context) -> Self {
         item.0
     }
 }

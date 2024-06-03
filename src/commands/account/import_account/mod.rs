@@ -117,6 +117,10 @@ fn save_access_key(
         ],
     )
     .prompt()?;
+
+    eprintln!("key: {:?}", key_pair_properties_buf);
+    eprintln!("network: {:?}", network_config);
+
     if let SelectStorage::SaveToKeychain = selection {
         let storage_message = crate::common::save_access_key_to_keychain(
             network_config,

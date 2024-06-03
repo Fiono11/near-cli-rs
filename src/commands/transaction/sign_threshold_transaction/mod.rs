@@ -1,8 +1,9 @@
 use inquire::CustomType;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
+mod aggregate;
 mod round1;
-//mod round2;
+mod round2;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(context = crate::GlobalContext)]
@@ -18,15 +19,20 @@ pub struct ImplicitThresholdAccount {
 /// Choose a mode to create an implicit account:
 pub enum SignThresholdTransactionRound {
     #[strum_discriminants(strum(
-        message = "round1  - Round1 of the creation of an implicit threshold account"
+        message = "round1  - Round1 of the signing of a threshold account"
     ))]
     /// Use auto-generation to create an implicit account
     Round1(self::round1::Round1),
-    /*#[strum_discriminants(strum(
-        message = "round2  - Round2 of the creation of an implicit threshold account"
+    #[strum_discriminants(strum(
+        message = "round2  - Round2 of the signing of a threshold account"
     ))]
     /// Use auto-generation to create an implicit account
-    Round2(self::round2::Round2),*/
+    Round2(self::round2::Round2),
+    #[strum_discriminants(strum(
+        message = "aggregate  - Aggregate the signature shares to form signature of the threshold account"
+    ))]
+    /// Use auto-generation to create an implicit account
+    Aggregate(self::aggregate::Aggregate),
 }
 
 #[derive(Clone)]

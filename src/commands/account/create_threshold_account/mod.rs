@@ -1,65 +1,82 @@
 #![allow(clippy::enum_variant_names, clippy::large_enum_variant)]
+use inquire::CustomType;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
-mod create_implicit_account;
-mod fund_myself_create_account;
-pub mod sponsor_by_faucet_service;
+//mod create_implicit_account;
+//mod fund_myself_create_account;
+pub mod round1;
+pub mod round2;
+//pub mod sponsor_by_faucet_service;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(context = crate::GlobalContext)]
 pub struct CreateThresholdAccount {
     #[interactive_clap(subcommand)]
-    account_actions: CoverCostsCreateThresholdAccount,
+    mode: Mode,
 }
 
-#[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
-#[interactive_clap(input_context = crate::GlobalContext)]
-#[interactive_clap(output_context = CoverCostsCreateThresholdAccountContext)]
+#[derive(Debug, Clone, EnumDiscriminants, interactive_clap_derive::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
-/// How do you cover the costs of account creation?
-pub enum CoverCostsCreateThresholdAccount {
-    /*#[strum_discriminants(strum(
-        message = "sponsor-by-faucet-service    - I would like the faucet service sponsor to cover the cost of creating an account (testnet only for now)"
-    ))]
-    /// I would like the faucet service sponsor to cover the cost of creating an account (testnet only for now)
-    SponsorByFaucetService(self::sponsor_by_faucet_service::NewThresholdAccount),
+/// Choose a mode to create an implicit account:
+pub enum Mode {
     #[strum_discriminants(strum(
-        message = "fund-myself                  - I would like fund myself to cover the cost of creating an account"
+        message = "round1  - Round1 of the creation of an implicit threshold account"
     ))]
-    /// I would like fund myself to cover the cost of creating an account
-    FundMyself(self::fund_myself_create_account::NewThresholdAccount),*/
+    /// Use auto-generation to create an implicit account
+    Round1(round1::Round1),
     #[strum_discriminants(strum(
-        message = "fund-later                   - Create an implicit threshold account"
+        message = "round2  - Round2 of the creation of an implicit threshold account"
     ))]
-    /// Create an implicit-account
-    FundLater(self::create_implicit_account::ImplicitThresholdAccount),
+    /// Use auto-generation to create an implicit account
+    Round2(round2::Round2),
 }
 
-#[derive(Debug, Clone)]
-pub struct CoverCostsCreateThresholdAccountContext(crate::GlobalContext);
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(input_context = SaveImplicitAccountContext)]
+#[interactive_clap(output_context = SaveToFolderContext)]
+pub struct SaveToFolder {
+    #[interactive_clap(skip_default_input_arg)]
+    /// Where to save the implicit account file?
+    folder_path: crate::types::path_buf::PathBuf,
+}
 
-impl CoverCostsCreateThresholdAccountContext {
+#[derive(Clone)]
+struct SaveToFolderContext;
+
+impl SaveToFolderContext {
     pub fn from_previous_context(
-        previous_context: crate::GlobalContext,
-        scope: &<CoverCostsCreateThresholdAccount as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
+        previous_context: SaveImplicitAccountContext,
+        scope: &<SaveToFolder as interactive_clap::ToInteractiveClapContextScope>::InteractiveClapContextScope,
     ) -> color_eyre::eyre::Result<Self> {
-        match scope {
-            /*CoverCostsCreateThresholdAccountDiscriminants::SponsorByFaucetService => {
-            if previous_context.offline {
-                Err(color_eyre::Report::msg(
-                    "Error: Creating an account with a faucet sponsor is not possible offline.",
-                ))
-            } else {
-                Ok(Self(previous_context))
-            }
-            }*/
-            _ => Ok(Self(previous_context)),
-        }
+        (previous_context.on_after_getting_folder_path_callback)(
+            &scope.folder_path.clone().into(),
+        )?;
+        Ok(Self)
     }
 }
 
-impl From<CoverCostsCreateThresholdAccountContext> for crate::GlobalContext {
-    fn from(item: CoverCostsCreateThresholdAccountContext) -> Self {
-        item.0
+impl SaveToFolder {
+    fn input_folder_path(
+        context: &SaveImplicitAccountContext,
+    ) -> color_eyre::eyre::Result<Option<crate::types::path_buf::PathBuf>> {
+        eprintln!();
+        Ok(Some(
+            CustomType::new("Where to save the implicit threshold account file?")
+                .with_starting_input(&format!(
+                    "{}/implicit_threshold_account",
+                    context.config.credentials_home_dir.to_string_lossy()
+                ))
+                .prompt()?,
+        ))
     }
+}
+
+pub type OnAfterGettingFolderPathCallback =
+    std::sync::Arc<dyn Fn(&std::path::PathBuf) -> crate::CliResult>;
+
+#[derive(Clone)]
+pub struct SaveImplicitAccountContext {
+    config: crate::config::Config,
+    on_after_getting_folder_path_callback: OnAfterGettingFolderPathCallback,
 }

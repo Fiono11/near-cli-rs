@@ -22,6 +22,8 @@ impl SaveWithUseAutoGenerationContext {
         let on_after_getting_folder_path_callback: super::OnAfterGettingFolderPathCallback =
             std::sync::Arc::new({
                 move |folder_path| {
+                    eprintln!("path: {:?}", folder_path);
+
                     let key_pair_properties = crate::common::generate_keypair()?;
                     let buf = serde_json::json!({
                         "master_seed_phrase": key_pair_properties.master_seed_phrase,
